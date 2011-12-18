@@ -24,7 +24,7 @@ describe "Promotion Adjustments" do
     it "should allow an admin to create a flat rate discount coupon promo" do
       fill_in "Name", :with => "Order's total > $30"
       fill_in "Usage Limit", :with => "100"
-      select "Coupon code added", :with => "Event"
+      select "Coupon code added", :from => "Event"
       fill_in "Code", :with => "ORDER_38"
       click_button "Create"
       page.should have_content("Editing Promotion")
@@ -125,7 +125,6 @@ describe "Promotion Adjustments" do
     end
 
     it "should allow an admin to create an automatic promo with flat percent discount" do
-      pending("TODO: cmar to look at this regarding #831")
       fill_in "Name", :with => "Order's total > $30"
       fill_in "Code", :with => ""
       select "Order contents changed", :from => "Event"
@@ -155,7 +154,6 @@ describe "Promotion Adjustments" do
     end
 
     it "should allow an admin to create an automatic promotion with free shipping" do
-      pending("TODO: cmar to look at this regarding #831")
       fill_in "Name", :with => "Free Shipping"
       fill_in "Code", :with => ""
       click_button "Create"
@@ -209,7 +207,6 @@ describe "Promotion Adjustments" do
     end
 
     it "should allow an admin to create an automatic promo requiring a landing page to be visited" do
-      pending("TODO: cmar to look at this regarding #831")
       fill_in "Name", :with => "Deal"
       select "Order contents changed", :from => "Event"
       click_button "Create"
@@ -217,7 +214,7 @@ describe "Promotion Adjustments" do
 
       select "Landing Page", :from => "Add rule of type"
       within('#rule_fields') { click_button "Add" }
-      fill_in "Path", :with => "cvv"
+      fill_in "Path", :with => "content/cvv"
       within('#rule_fields') { click_button "Update" }
 
       select "Create adjustment", :from => "Add action of type"
@@ -232,7 +229,7 @@ describe "Promotion Adjustments" do
       click_button "Add To Cart"
       Spree::Order.last.total.to_f.should == 40.00
 
-      visit "/cvv"
+      visit "/content/cvv"
       visit spree.root_path
       click_link "RoR Mug"
       click_button "Add To Cart"
@@ -240,8 +237,6 @@ describe "Promotion Adjustments" do
     end
 
     it "ceasing to be eligible for a promotion with item total rule then becoming eligible again" do
-      pending("TODO: cmar to look at this regarding #831")
-
       fill_in "Name", :with => "Spend over $50 and save $5"
       select "Order contents changed", :from => "Event"
       click_button "Create"
@@ -285,7 +280,6 @@ describe "Promotion Adjustments" do
     end
 
     it "only counting the most valuable promotion adjustment in an order" do
-      pending("TODO: cmar to look at this regarding #831")
       fill_in "Name", :with => "$5 off"
       select "Order contents changed", :from => "Event"
       click_button "Create"

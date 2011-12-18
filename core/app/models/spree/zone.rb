@@ -16,8 +16,8 @@ module Spree
     def kind
       member = self.members.last
       case member && member.zoneable_type
-      when 'State' then 'state'
-      when 'Zone'  then 'zone'
+      when 'Spree::State' then 'state'
+      when 'Spree::Zone'  then 'zone'
       else
         'country'
       end
@@ -27,9 +27,10 @@ module Spree
       # do nothing - just here to satisfy the form
     end
 
+    # TODO: Remove this method after 1.0
     # alias to the new include? method
     def in_zone?(address)
-      $stderr.puts 'Warning: calling deprecated method :in_zone? use :include? instead.'
+      ActiveSupport::Deprecation.warn '#in_zone? is deprecated and will be removed in Spree > 1.0. Use #include? instead.'
       include?(address)
     end
 
@@ -58,13 +59,13 @@ module Spree
     # convenience method for returning the countries contained within a zone (different then the countries method which only
     # returns the zones children and does not consider the grand children if the children themselves are zones)
     def country_list
-      members.map {|zone_member|
+      members.map { |zone_member|
         case zone_member.zoneable_type
-        when 'Zone'
+        when 'Spree::Zone'
           zone_member.zoneable.country_list
-        when 'Country'
+        when 'Spree::Country'
           zone_member.zoneable
-        when 'State'
+        when 'Spree::State'
           zone_member.zoneable.country
         else
           nil

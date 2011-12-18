@@ -6,6 +6,10 @@ describe Spree::Promotion do
   describe "#save" do
     let(:promotion_valid) { Spree::Promotion.new :name => "A promotion", :code => "XXXX" }
 
+    it "should validate the coupon code" do
+      pending "Figure out some form of validation for codes now that this is Promo preference"
+    end
+
     context "when is invalid" do
       before { promotion.name = nil }
       it { promotion.save.should be_false }
@@ -13,6 +17,12 @@ describe Spree::Promotion do
 
     context "when is valid" do
       it { promotion_valid.save.should be_true }
+
+      it "should have the right key in preferences" do
+        promotion_valid.save.should be_true
+        Spree::Preference.last.key.should_not eql('spree/promotion/code/new')
+        Spree::Preference.last.key.should eql("spree/promotion/code/#{promotion_valid.id}")
+      end
     end
   end
 
@@ -69,21 +79,21 @@ describe Spree::Promotion do
       end
     end
   end
-  
+
   context "#usage_limit_exceeded" do
      it "should not have its usage limit exceeded" do
        promotion.should_not be_usage_limit_exceeded
      end
-     
+
      it "should have its usage limit exceeded" do
        promotion.preferred_usage_limit = 2
        promotion.stub(:credits_count => 2)
        promotion.usage_limit_exceeded?.should == true
-  
+
        promotion.stub(:credits_count => 3)
        promotion.usage_limit_exceeded?.should == true
      end
-   end                         
+   end
 
   context "#expired" do
     it "should not be exipired" do
@@ -191,12 +201,18 @@ describe Spree::Promotion do
     end
 
     context "with 'any' match policy" do
-      before { promotion.match_policy = 'any' }
+      before(:each) do
+        @promotion = Spree::Promotion.new(:name => "Promo", :match_policy => 'any')
+        @promotion.save
+      end
 
       it "should have eligible rules if any of the rules is eligible" do
-        promotion.promotion_rules = [mock_model(Spree::PromotionRule, :eligible? => true),
-                                     mock_model(Spree::PromotionRule, :eligible? => false)]
-        promotion.rules_are_eligible?(@order).should be_true
+        true_rule = Spree::PromotionRule.create(:promotion => @promotion)
+        true_rule.stub(:eligible?).and_return(true)
+        false_rule = Spree::PromotionRule.create(:promotion => @promotion)
+        false_rule.stub(:eligible?).and_return(false)
+        @promotion.rules << true_rule
+        @promotion.rules_are_eligible?(@order).should be_true
       end
     end
 

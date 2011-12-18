@@ -14,7 +14,7 @@ module Spree
 
       config.to_prepare &method(:activate).to_proc
 
-      config.before_initialize do
+      config.before_initialize do |app|
         ::ActiveRecord::Base.send :include, Spree::Preferences::Preferable
       end
 
@@ -77,6 +77,12 @@ module Spree
 
       # sets the manifests / assets to be precompiled
       initializer "spree.assets.precompile", :group => :assets do |app|
+
+        # We need to require this because #config.before_initialize above needs to include
+        # the Preferable module in ActiveRecord::Base, but if config.assets.initialize_on_precompile is
+        # set to false, the Preferable module won't yet be loaded.  This makes sure that it is.
+        require 'spree/preferences/preferable'
+
         app.config.assets.precompile += ['store/all.*', 'admin/all.*', 'admin/spree_dash.*', 'admin/orders/edit_form.js', 'jqPlot/excanvas.min.js', 'admin/images/new.js', 'jquery.jstree/themes/apple/*']
       end
 
